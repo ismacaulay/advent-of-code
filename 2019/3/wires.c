@@ -127,24 +127,30 @@ Point* find_intersection_point(Point* p1, Point* p2, Point* p3, Point* p4) {
         ret = (Point*)malloc(sizeof(Point));
         ret->x = p1->x;
         ret->y = p3->y;
+        ret->steps = (p3->steps + abs(p1->x - p3->x)) + (p1->steps + abs(p1->y - p3->y));
         ret->next = NULL;
     } else if (value_between(p3->x, p1->x, p2->x) && value_between(p1->y, p3->y, p4->y)) {
         ret = (Point*)malloc(sizeof(Point));
         ret->x = p3->x;
         ret->y = p1->y;
+        ret->steps = (p3->steps + abs(p1->y - p3->y)) + (p1->steps + abs(p1->x - p3->x));
         ret->next = NULL;
     }
     return ret;
 }
 
-unsigned int calculate_manhatten_dist(Point* p1, Point* p2) {
-    unsigned int x_dist = abs(p2->x - p1->x);
-    unsigned int y_dist = abs(p2->y - p1->y);
+unsigned int calculate_manhatten_dist(Point* p1) {
+    unsigned int x_dist = abs(p1->x);
+    unsigned int y_dist = abs(p1->y);
 
     return x_dist + y_dist;
 }
 
-unsigned int find_closest_distance(char* path1, char* path2) {
+unsigned int get_steps(Point* p1) {
+    return p1->steps;
+}
+
+unsigned int find_closest_distance(char* path1, char* path2, unsigned int(*calc_dist_fn)(Point*)) {
     Point origin = {0, 0, 0, NULL};
 
     unsigned int dist = UINT_MAX;
@@ -160,7 +166,7 @@ unsigned int find_closest_distance(char* path1, char* path2) {
         while(p4 != NULL) {
             Point* intersect = find_intersection_point(p1, p2, p3, p4);
             if (intersect != NULL) {
-                unsigned int d = calculate_manhatten_dist(intersect, &origin);
+                unsigned int d = (*calc_dist_fn)(intersect);
                 if (d > 0 && d < dist) {
                     dist = d;
                 }
@@ -188,24 +194,34 @@ int main() {
         char* path1 = "R8,U5,L5,D3";
         char* path2 = "U7,R6,D4,L4";
         unsigned int expected = 6;
-        unsigned int dist = find_closest_distance(path1, path2);
-        printf("TC: expected=%d, actual=%d\n", expected, dist);
+        unsigned int dist = find_closest_distance(path1, path2, &calculate_manhatten_dist);
+        printf("TC 1.1: expected=%d, actual=%d\n", expected, dist);
+
+        expected = 30;
+        dist = find_closest_distance(path1, path2, &get_steps);
+        printf("TC 1.2: expected=%d, actual=%d\n", expected, dist);
     }
     {
         char* path1 = "R75,D30,R83,U83,L12,D49,R71,U7,L72";
         char* path2 = "U62,R66,U55,R34,D71,R55,D58,R83";
         unsigned int expected = 159;
-        unsigned int dist = find_closest_distance(path1, path2);
+        unsigned int dist = find_closest_distance(path1, path2, &calculate_manhatten_dist);
+        printf("TC 2.1: expected=%d, actual=%d\n", expected, dist);
 
-        printf("TC: expected=%d, actual=%d\n", expected, dist);
+        expected = 610;
+        dist = find_closest_distance(path1, path2, &get_steps);
+        printf("TC 2.2: expected=%d, actual=%d\n", expected, dist);
     }
     {
         char* path1 = "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51";
         char* path2 = "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7";
         unsigned int expected = 135;
-        unsigned int dist = find_closest_distance(path1, path2);
+        unsigned int dist = find_closest_distance(path1, path2, &calculate_manhatten_dist);
+        printf("TC 3.1: expected=%d, actual=%d\n", expected, dist);
 
-        printf("TC: expected=%d, actual=%d\n", expected, dist);
+        expected = 410;
+        dist = find_closest_distance(path1, path2, &get_steps);
+        printf("TC 3.2: expected=%d, actual=%d\n", expected, dist);
     }
 
     FILE* file;
@@ -223,6 +239,9 @@ int main() {
     getline(&path1, &len1, file);
     getline(&path2, &len2, file);
 
-    unsigned int dist = find_closest_distance(path1, path2);
-    printf("Found dist: %d\n", dist);
+    unsigned int dist = find_closest_distance(path1, path2, &calculate_manhatten_dist);
+    printf("Run 1: %d\n", dist);
+
+    dist = find_closest_distance(path1, path2, &get_steps);
+    printf("Run 2: %d\n", dist);
 }
