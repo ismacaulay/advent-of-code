@@ -128,7 +128,7 @@ void free_orbit_map(OrbitMap* map) {
     map->tail = NULL;
 }
 
-int get_checksum(OrbitMap* map) {
+int calculate_checksum(OrbitMap* map) {
     int orbits = 0;
     int indirect_orbits = 0;
     ObjectNode* runner = map->head;
@@ -151,27 +151,72 @@ int get_checksum(OrbitMap* map) {
     return orbits + indirect_orbits;
 }
 
+int calculate_required_transfers(OrbitMap* map) {
+    char* you = "YOU";
+    ObjectNode* you_node = find_object(map, you);
+
+    char* san = "SAN";
+    ObjectNode* san_node = find_object(map, san);
+
+    int total = 0;
+    Object* san_runner = san_node->object->orbitting;
+    while(san_runner != NULL) {
+        int jumps = 0;
+        int found = 0;
+
+        Object* you_runner = you_node->object->orbitting;
+        while(you_runner != NULL) {
+            if (strcmp(you_runner->name, san_runner->name) == 0) {
+                found = 1;
+                break;
+            }
+
+            if (you_runner->orbitting != NULL) {
+                jumps++;
+            }
+
+            you_runner = you_runner->orbitting;
+        }
+
+        if (found) {
+            total += jumps;
+            break;
+        }
+
+        if (san_runner->orbitting != NULL) {
+            total++;
+        }
+
+        san_runner = san_runner->orbitting;
+    }
+
+    return total;
+}
 
 int main() {
     {
         char* input = "test.txt";
         OrbitMap* map = build_orbit_map(input);
-        int orbits = get_checksum(map);
-        printf("Checksum for map in %s: %d\n", input, orbits);
+        int checksum = calculate_checksum(map);
+        printf("Input: %s\n", input);
+        printf("\tChecksum: %d\n", checksum);
         free_orbit_map(map);
     }
     {
         char* input = "test2.txt";
         OrbitMap* map = build_orbit_map(input);
-        int orbits = get_checksum(map);
-        printf("Checksum for map in %s: %d\n", input, orbits);
+        int transfers = calculate_required_transfers(map);
+        printf("Input: %s\n", input);
+        printf("\tTransfers: %d\n", transfers);
         free_orbit_map(map);
     }
     {
         char* input = "input.txt";
         OrbitMap* map = build_orbit_map(input);
-        int orbits = get_checksum(map);
-        printf("Checksum for map in %s: %d\n", input, orbits);
+        int checksum = calculate_checksum(map);
+        int transfers = calculate_required_transfers(map);
+        printf("Input: %s\n", input);
+        printf("\tChecksum: %d, Transfers: %d\n", checksum, transfers);
         free_orbit_map(map);
     }
 }
