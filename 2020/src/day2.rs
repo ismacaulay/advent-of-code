@@ -29,7 +29,8 @@ fn read_problem_data() -> io::Result<Vec<Entry>> {
     Ok(result)
 }
 
-pub fn problem_2a() {
+#[allow(dead_code)]
+pub fn problem1() {
     println!("running problem 2a:");
 
     fn is_entry_valid(entry: &Entry) -> bool {
@@ -56,7 +57,7 @@ pub fn problem_2a() {
 }
 
 #[allow(dead_code)]
-pub fn problem_2b() {
+pub fn problem2() {
     println!("running problem 2b:");
     fn is_entry_valid(entry: &Entry) -> bool {
         let chars: Vec<char> = entry.password.chars().collect();

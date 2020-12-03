@@ -18,7 +18,7 @@ fn read_problem1_data() -> io::Result<Vec<i32>> {
 }
 
 #[allow(dead_code)]
-pub fn problem_1a() {
+pub fn problem1() {
     println!("running problem 1a:");
 
     let mut map = HashMap::new();
@@ -45,7 +45,7 @@ pub fn problem_1a() {
 }
 
 #[allow(dead_code)]
-pub fn problem_1b() {
+pub fn problem2() {
     println!("running problem 1b:");
 
     let mut map = HashMap::new();
