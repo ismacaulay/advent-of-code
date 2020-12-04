@@ -9,3 +9,10 @@ where
     let file = File::open(path)?;
     Ok(io::BufReader::new(file).lines())
 }
+
+pub fn is_numeric_string_in_range(s: &str, min: usize, max: usize) -> bool {
+    if let Ok(num) = s.parse::<usize>() {
+        return min <= num && num <= max;
+    }
+    return false;
+}
