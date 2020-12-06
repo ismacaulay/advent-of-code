@@ -3,6 +3,7 @@ mod day2;
 mod day3;
 mod day4;
 mod day5;
+mod day6;
 mod utils;
 
 fn main() {
@@ -18,6 +19,9 @@ fn main() {
     // day4::problem1();
     // day4::problem2();
 
-    day5::problem1();
-    day5::problem2();
+    // day5::problem1();
+    // day5::problem2();
+
+    day6::problem1();
+    day6::problem2();
 }
