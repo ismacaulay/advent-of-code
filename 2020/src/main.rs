@@ -1,6 +1,7 @@
 mod day1;
 mod day10;
 mod day11;
+mod day12;
 mod day2;
 mod day3;
 mod day4;
@@ -42,6 +43,9 @@ fn main() {
     // day10::problem1();
     // day10::problem2();
 
-    day11::problem1();
-    day11::problem2();
+    // day11::problem1();
+    // day11::problem2();
+
+    day12::problem1();
+    day12::problem2();
 }
