@@ -116,7 +116,6 @@ fn apply_address_mask(mask: &String, addr: usize) -> Vec<usize> {
 #[allow(dead_code)]
 pub fn problem2() {
     println!("running problem 14.2:");
-    println!("running problem 14.1:");
     let mut mem = HashMap::new();
     let mut mask = String::from("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
