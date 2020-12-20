@@ -6,7 +6,7 @@ const TEST_MODE: bool = false;
 #[derive(Debug)]
 enum Rule {
     Single(Vec<String>),
-    Double((Vec<String>, Vec<String>)),
+    Multiple(Vec<Vec<String>>),
     Sink(char),
 }
 
@@ -15,13 +15,7 @@ struct ProblemData {
     messages: Vec<String>,
 }
 
-fn read_problem_data() -> ProblemData {
-    let path = if TEST_MODE {
-        "data/day19.test2.txt"
-    } else {
-        "data/day19.txt"
-    };
-
+fn read_problem_data(path: &str) -> ProblemData {
     let mut processing_rules = true;
     let mut rules = HashMap::new();
     let mut messages = Vec::new();
@@ -37,12 +31,14 @@ fn read_problem_data() -> ProblemData {
 
                         let rule: Rule;
                         if parts[1].contains("|") {
-                            let parts = parts[1].split("|").collect::<Vec<&str>>();
-                            let first: Vec<String> =
-                                parts[0].trim().split(" ").map(|s| s.to_string()).collect();
-                            let second: Vec<String> =
-                                parts[1].trim().split(" ").map(|s| s.to_string()).collect();
-                            rule = Rule::Double((first, second));
+                            let mut r = Vec::new();
+                            for p in parts[1].split("|") {
+                                r.push(p.trim().split(" ").map(|s| s.to_string()).collect());
+                            }
+                            if r.len() > 2 {
+                                println!("long: {:?}", r);
+                            }
+                            rule = Rule::Multiple(r);
                         } else if parts[1].contains("\"") {
                             let parts = parts[1].trim().split("\"").collect::<Vec<&str>>();
                             let chars = parts[1].chars().collect::<Vec<char>>();
@@ -106,15 +102,12 @@ fn matches_rule(
         Rule::Single(values) => {
             return matches_single(tokens, idx, values, rules);
         }
-        Rule::Double((lhs, rhs)) => {
-            let (m, i) = matches_single(tokens, idx, lhs, rules);
-            if m {
-                return (true, i);
-            }
-
-            let (m, i) = matches_single(tokens, idx, rhs, rules);
-            if m {
-                return (true, i);
+        Rule::Multiple(values) => {
+            for v in values {
+                let (m, i) = matches_single(tokens, idx, v, rules);
+                if m {
+                    return (true, i);
+                }
             }
 
             return (false, 0);
@@ -129,6 +122,7 @@ fn is_valid(message: &String, rules: &HashMap<String, Rule>) -> bool {
     let tokens = message.chars().collect::<Vec<char>>();
     let rule_id = String::from("0");
     let (m, i) = matches_rule(&tokens, 0, rules.get(&rule_id).unwrap(), rules);
+    // println!("Found: m: {}, i:  {}, message: {}", m, i, message);
     return m && i == message.len();
 }
 
@@ -136,7 +130,12 @@ fn is_valid(message: &String, rules: &HashMap<String, Rule>) -> bool {
 pub fn problem1() {
     println!("running problem 19.1:");
 
-    let data = read_problem_data();
+    let path = if TEST_MODE {
+        "data/day19.test.txt"
+    } else {
+        "data/day19.txt"
+    };
+    let data = read_problem_data(path);
     let mut num_valid = 0;
     for m in data.messages.iter() {
         if is_valid(m, &data.rules) {
@@ -151,32 +150,21 @@ pub fn problem1() {
 pub fn problem2() {
     println!("running problem 19.2:");
 
-    // let mut data = read_problem_data();
-    // data.rules.insert(
-    //     String::from("8"),
-    //     Rule::Double((
-    //         vec![String::from("42")],
-    //         vec![String::from("42"), String::from("8")],
-    //     )),
-    // );
-    // data.rules.insert(
-    //     String::from("11"),
-    //     Rule::Double((
-    //         vec![String::from("42"), String::from("31")],
-    //         vec![String::from("42"), String::from("11"), String::from("31")],
-    //     )),
-    // );
-    //
-    // println!("valid: {}", is_valid(&data.messages[2], &data.rules));
-    // let mut num_valid = 0;
-    // for m in data.messages.iter() {
-    //     println!("checking {}", m);
-    //     if is_valid(m, &data.rules) {
-    //         println!("VALID");
-    //         num_valid += 1;
-    //     }
-    // }
-    // println!("Found {} valid", num_valid);
+    let path = if TEST_MODE {
+        "data/day19.test2.txt"
+    } else {
+        "data/day19.2.txt"
+    };
+
+    let data = read_problem_data(path);
+    let mut num_valid = 0;
+    for m in data.messages.iter() {
+        if is_valid(m, &data.rules) {
+            num_valid += 1;
+        }
+    }
+
+    println!("Found {} valid", num_valid);
 }
 
 #[cfg(test)]
@@ -196,24 +184,24 @@ mod tests {
         );
         rules.insert(
             String::from("1"),
-            Rule::Double((
+            Rule::Multiple(vec![
                 vec![String::from("2"), String::from("3")],
                 vec![String::from("3"), String::from("2")],
-            )),
+            ]),
         );
         rules.insert(
             String::from("2"),
-            Rule::Double((
+            Rule::Multiple(vec![
                 vec![String::from("4"), String::from("4")],
                 vec![String::from("5"), String::from("5")],
-            )),
+            ]),
         );
         rules.insert(
             String::from("3"),
-            Rule::Double((
+            Rule::Multiple(vec![
                 vec![String::from("4"), String::from("5")],
                 vec![String::from("5"), String::from("4")],
-            )),
+            ]),
         );
         rules.insert(String::from("4"), Rule::Sink('a'));
         rules.insert(String::from("5"), Rule::Sink('b'));
